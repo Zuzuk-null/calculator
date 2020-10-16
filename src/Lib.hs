@@ -12,6 +12,7 @@ module Lib
       spaces) where
 import Data.Char
 import Data.List
+import Control.Applicative
 
 newtype Parser a = Parser { runParser :: String -> [(String, a)] }
 
@@ -23,6 +24,10 @@ instance Applicative Parser where
     (Parser p1) <*> (Parser p2) = Parser f where 
         f str = [ (str2, f x) | (str1, f) <- p1 str, 
                                 (str2, x) <- p2 str1 ]
+                                
+instance Alternative Parser where
+    empty = Parser $ const []
+    (Parser px) <|> (Parser py) = Parser (\s -> px s ++ py s)
 
 parseString ::  Parser a -> String -> Maybe a
 parseString (Parser p) str = 
